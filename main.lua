@@ -1,28 +1,29 @@
 function securityMode()
     if securityModeGG == true then
-	local players = game:GetService("Players")
-	local ignorePlaceIds = { 8304191830 }
+        local players = game:GetService("Players")
+        local ignorePlaceIds = { 8304191830 }
 
-	local function isPlaceIdIgnored(placeId)
-		for _, id in ipairs(ignorePlaceIds) do
-			if id == placeId then
-				return true
-			end
-		end
-		return false
-	end
+        local function isPlaceIdIgnored(placeId)
+            for _, id in ipairs(ignorePlaceIds) do
+                if id == placeId then
+                    return true
+                end
+            end
+            return false
+        end
 
-	while getgenv().securityMode do
-		if #players:GetPlayers() >= 2 then
-			local player1 = players:GetPlayers()[1]
-			local targetPlaceId = 8304191830
+        while getgenv().securityMode do
+            if #players:GetPlayers() >= 2 then
+                local player1 = players:GetPlayers()[1]
+                local targetPlaceId = 8304191830
 
-			if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
-				game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
-			end
-		end
-		wait(1)
-	end
+                if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
+                    game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
+                end
+            end
+            wait(1)
+        end
+    end
 end
 
 function deletemap()
