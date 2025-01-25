@@ -73,6 +73,44 @@ function hideInfoPlayer()
 	end
 end
 
+function autoreplay()
+	while autoreplayGG == true do
+		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
+		if resultUI and resultUI.Enabled == true then
+			wait(3)
+			local args = {
+				[1] = "replay",
+			}
+
+			game:GetService("ReplicatedStorage")
+				:WaitForChild("endpoints")
+				:WaitForChild("client_to_server")
+				:WaitForChild("set_game_finished_vote")
+				:InvokeServer(unpack(args))
+		end
+		wait()
+	end
+end
+
+function autostart()
+	while autostartGG == true do
+		game:GetService("ReplicatedStorage").endpoints.client_to_server.vote_start:InvokeServer()
+	end
+end
+
+function autoskipwave()
+	while autoskipwaveGG == true do
+		game:GetService("ReplicatedStorage").endpoints.client_to_server.vote_wave_skip:InvokeServer()
+	end
+end
+
+function kaitun()
+    while kaitunGG == true do
+        wait()
+    end
+end
+
+kaitun()
 hideInfoPlayer()
 securityMode()
 deletemap()
