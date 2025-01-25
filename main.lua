@@ -27,10 +27,6 @@ warn("[TEMPEST HUB] Last Checking")
 wait()
 
 local checkProgressionPlayerEnabled = true
-local autoUpgradeUnitEnabled = true
-local autoPlaceUnitEnabled = true
-local autoSkipWaveEnabled = true
-local autoStartEnabled = true
 local autoLeaveEnabled = true
 local autoreplayEnabled = true
 
@@ -72,9 +68,8 @@ function aeuat()
 
 				queue_on_teleport([[         
                     repeat task.wait() until game:IsLoaded()
-                    wait(3)
                     if getgenv().executed then return end    
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/kaitunAA/main/main.lua"))()
                 ]])
 
 				getgenv().executed = true
@@ -189,7 +184,7 @@ function autoleave()
 end
 
 function autostart()
-	while autoStartEnabled == true do
+	while getgenv().autostart == true do
 		local voteStart = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("VoteStart")
 		if voteStart and voteStart.Enabled == true then
 			game:GetService("ReplicatedStorage").endpoints.client_to_server.vote_start:InvokeServer()
@@ -198,17 +193,25 @@ function autostart()
 	end
 end
 
-function autoskipwave()
-	while autoSkipWaveEnabled == true do
+function disableNotifications()
+	local notifications = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("NotificationWindows")
+	if notifications then
+		notifications.Enabled = false
+	end
+end
+
+function autoSkipWave()
+	while getgenv().autoSkipWave == true do
 		local voteSkip = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("VoteSkip")
 		if voteSkip and voteSkip.Enabled == true then
 			game:GetService("ReplicatedStorage").endpoints.client_to_server.vote_wave_skip:InvokeServer()
 		end
+		wait()
 	end
 end
 
-function autoPlaceUnit()
-	while autoPlaceUnitEnabled == true do
+function autoPlace()
+	while getgenv().autoPlace == true do
 		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
 		local success, upvalues = pcall(debug.getupvalues, Loader.init)
 
@@ -315,8 +318,8 @@ function autoPlaceUnit()
 	end
 end
 
-function autoUpgradeUnit()
-	while autoUpgradeUnitEnabled == true do
+function autoUpgrade()
+	while getgenv().autoUpgrade == true do
 		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
 		local upvalues = debug.getupvalues(Loader.init)
 
@@ -467,15 +470,27 @@ function checkProgressionPlayer()
 			["CLIENT_CLASS"] = upvalues[10],
 			["CLIENT_SERVICE"] = upvalues[11],
 		}
+		
 		function getKeys(tbl)
+			local keys = {}
 			for key, _ in pairs(tbl) do
-				return key
+				table.insert(keys, key)
 			end
-			return nil
+			return keys
 		end
+		
 		local storyFinished = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.level_data.completed_story_levels
 		local storyFinishedToCheck = getKeys(storyFinished)
-		if storyFinishedToCheck == "namek_level_6" then
+		
+		local hasNamekLevel6 = false
+		for _, key in ipairs(storyFinishedToCheck) do
+			if key == "namek_level_6" then
+				hasNamekLevel6 = true
+				break
+			end
+		end
+		
+		if hasNamekLevel6 then
 			local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
 			if inLobby then
 				local args = {
@@ -509,10 +524,8 @@ function checkProgressionPlayer()
 					:WaitForChild("client_to_server")
 					:WaitForChild("request_start_game")
 					:InvokeServer(unpack(args))
-				break
 			else
 				autoreplay()
-				break
 			end
 		else
 			local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
@@ -535,10 +548,8 @@ function checkProgressionPlayer()
 					:WaitForChild("client_to_server")
 					:WaitForChild("lobby_world_skip")
 					:InvokeServer(unpack(args))
-				break
 			else
 				autoleave()
-				break
 			end
 		end
 
@@ -661,10 +672,6 @@ function kaitun()
 			wait(1)
 			checkProgressionPlayer()
 		else
-			autoStart()
-			autoSkipWave()
-			autoPlaceUnit()
-			autoUpgradeUnit()
 			checkProgressionPlayer()
         end
 		wait()
@@ -923,6 +930,53 @@ LeftGroupBox:AddToggle("DM", {
 	Callback = function(Value)
 		getgenv().deletemap = Value
 		deletemap()
+	end,
+})
+
+LeftGroupBox:AddToggle("DN", {
+	Text = "Disable Notifications",
+	Default = false,
+	Callback = function(Value)
+		getgenv().disableNotifications = Value
+		disableNotifications()
+	end,
+})
+
+LeftGroupBox:AddToggle("AS", {
+	Text = "Auto Start",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autostart = Value
+		autostart()
+	end,
+})
+
+LeftGroupBox:AddToggle("ASW", {
+	Text = "Auto Skip Wave",
+	Default = false,
+	Callback = function(Value)
+		getgenv().autoSkipWave = Value
+		autoSkipWave()
+	end,
+})
+
+LeftGroupBox:AddToggle("Auto Place", {
+	Text = "Auto Place",
+	Default = false,
+
+	Callback = function(Value)
+		getgenv().autoPlace = Value
+		autoPlace()
+	end,
+})
+
+LeftGroupBox:AddToggle("Auto Upgrade", {
+	Text = "Auto Upgrade",
+	Default = false,
+
+	Callback = function(Value)
+		getgenv().autoUpgrade = Value
+		autoUpgrade()
 	end,
 })
 
