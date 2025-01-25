@@ -791,6 +791,13 @@ local autoSkipWave = true
 local autoPlaceUnit = true
 local autoUpgradeUnit = true
 local checkProgressionPlayer = true
+local securityModeEnabled = false
+local deleteMapEnabled = false
+local blackScreenEnabled = true
+local hideInfoPlayerEnabled = true
+local kaitunEnabled = false
+local webhookEnabled = false
+local discordWebhookUrl = ""
 if kaitunEnabled == true then
 	kaitun()
 end
