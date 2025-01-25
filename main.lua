@@ -1,5 +1,91 @@
 repeat task.wait() until game:IsLoaded()
-wait(1)
+warn("[TEMPEST HUB] Loading Ui")
+wait()
+local repo = "https://raw.githubusercontent.com/TrilhaX/tempestHubUI/main/"
+
+--Loading UI Library
+local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
+Library:Notify("Welcome to Tempest Hub", 5)
+
+--Configuring UI Library
+local Window = Library:CreateWindow({
+	Title = "Tempest Hub | Anime Adventures Kaitun",
+	Center = true,
+	AutoShow = true,
+	TabPadding = 8,
+	MenuFadeTime = 0.2,
+})
+
+Library:Notify("Loading Anime Adventures Kaitun Script", 5)
+warn("[TEMPEST HUB] Loading Function")
+wait()
+warn("[TEMPEST HUB] Loading Toggles")
+wait()
+warn("[TEMPEST HUB] Last Checking")
+wait()
+
+local checkProgressionPlayerEnabled = true
+local autoUpgradeUnitEnabled = true
+local autoPlaceUnitEnabled = true
+local autoSkipWaveEnabled = true
+local autoStartEnabled = true
+local autoLeaveEnabled = true
+local autoreplayEnabled = true
+
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local GuiService = game:GetService("GuiService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
+local speed = 1000
+
+function hideUIExec()
+	if hideUIExecEnabled then
+		local coreGui = game:GetService("CoreGui")
+		local windowFrame = nil
+		
+		if coreGui:FindFirstChild("LinoriaGui") then
+			windowFrame = coreGui.LinoriaGui:FindFirstChild("windowFrame")
+		elseif coreGui:FindFirstChild("RobloxGui") and coreGui.RobloxGui:FindFirstChild("LinoriaGui") then
+			windowFrame = coreGui.RobloxGui.LinoriaGui:FindFirstChild("windowFrame")
+		end
+		
+		if windowFrame then
+			windowFrame.Visible = false
+		else
+			warn("windowFrame não encontrado.")
+		end		
+	end
+end
+
+function aeuat()
+	if aeuatEnabled == true then
+		local teleportQueued = false
+		game.Players.LocalPlayer.OnTeleport:Connect(function(State)
+			if
+				(State == Enum.TeleportState.Started or State == Enum.TeleportState.InProgress) and not teleportQueued
+			then
+				teleportQueued = true
+
+				queue_on_teleport([[         
+                    repeat task.wait() until game:IsLoaded()
+                    wait(3)
+                    if getgenv().executed then return end    
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/TrilhaX/TempestHubMain/main/Main"))()
+                ]])
+
+				getgenv().executed = true
+				wait(10)
+				teleportQueued = false
+			end
+		end)
+		wait()
+	end
+end
+
 function securityMode()
 	if securityModeEnabled == true then
 		local players = game:GetService("Players")
@@ -78,7 +164,7 @@ function hideInfoPlayer()
 end
 
 function autoreplay()
-	while autoreplay == true do
+	while autoreplayEnabled == true do
 		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
 		if resultUI and resultUI.Enabled == true then
 			wait(3)
@@ -96,7 +182,7 @@ function autoreplay()
 end
 
 function autoleave()
-	while getgenv().autoleave == true do
+	while autoLeaveEnabled == true do
 		local resultUI = game:GetService("Players").LocalPlayer.PlayerGui.ResultsUI
 		if resultUI and resultUI.Enabled == true then
 			wait(3)
@@ -107,7 +193,7 @@ function autoleave()
 end
 
 function autostart()
-	while autoStart == true do
+	while autoStartEnabled == true do
 		local voteStart = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("VoteStart")
 		if voteStart and voteStart.Enabled == true then
 			game:GetService("ReplicatedStorage").endpoints.client_to_server.vote_start:InvokeServer()
@@ -117,7 +203,7 @@ function autostart()
 end
 
 function autoskipwave()
-	while autoSkipWave == true do
+	while autoSkipWaveEnabled == true do
 		local voteSkip = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("VoteSkip")
 		if voteSkip and voteSkip.Enabled == true then
 			game:GetService("ReplicatedStorage").endpoints.client_to_server.vote_wave_skip:InvokeServer()
@@ -126,7 +212,7 @@ function autoskipwave()
 end
 
 function autoPlaceUnit()
-	while autoPlaceUnit == true do
+	while autoPlaceUnitEnabled == true do
 		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
 		local success, upvalues = pcall(debug.getupvalues, Loader.init)
 
@@ -234,7 +320,7 @@ function autoPlaceUnit()
 end
 
 function autoUpgradeUnit()
-	while autoUpgradeUnit == true do
+	while autoUpgradeUnitEnabled == true do
 		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
 		local upvalues = debug.getupvalues(Loader.init)
 
@@ -326,7 +412,6 @@ function autoEquipUnit()
 			if not selectedUUIDs[uuid] then
 				selectedUUIDs[uuid] = true
 				count = count + 1
-				print(uuid)
 				local args = {
 					[1] = tostring(uuid),
 				}
@@ -336,6 +421,7 @@ function autoEquipUnit()
 					:WaitForChild("client_to_server")
 					:WaitForChild("equip_unit")
 					:InvokeServer(unpack(args))
+				wait(1)
 			end
 
 			table.remove(uuidList, randomIndex)
@@ -374,9 +460,12 @@ function checkPlayerXp()
 end
 
 function checkProgressionPlayer()
-	while checkProgressionPlayer == true do
+	while checkProgressionPlayerEnabled == true do
+
 		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+
 		upvalues = debug.getupvalues(Loader.init)
+
 		local Modules = {
 			["CORE_CLASS"] = upvalues[6],
 			["CORE_SERVICE"] = upvalues[7],
@@ -385,63 +474,75 @@ function checkProgressionPlayer()
 			["CLIENT_CLASS"] = upvalues[10],
 			["CLIENT_SERVICE"] = upvalues[11],
 		}
+
 		local storyFinished = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.level_data.completed_story_levelsA
 
 		if storyFinished == namek_level_6 then
-			print("Story Finished")
+
 			local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
+
 			if inLobby then
 				local args = {
 					[1] = "_lobbytemplategreen1"
 				}
-				
-				game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_join_lobby"):InvokeServer(unpack(args))
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("endpoints")
+					:WaitForChild("client_to_server")
+					:WaitForChild("request_join_lobby")
+					:InvokeServer(unpack(args))
+
 				local args = {
 					[1] = "_lobbytemplategreen1",
 					[2] = "namek_infinite",
 					[3] = true,
 					[4] = "Hard",
 				}
-	
 				game:GetService("ReplicatedStorage")
 					:WaitForChild("endpoints")
 					:WaitForChild("client_to_server")
 					:WaitForChild("request_lock_level")
 					:InvokeServer(unpack(args))
+
 				wait(1)
+
 				local args = {
 					[1] = "_lobbytemplategreen1",
 				}
-			
 				game:GetService("ReplicatedStorage")
 					:WaitForChild("endpoints")
 					:WaitForChild("client_to_server")
 					:WaitForChild("request_start_game")
 					:InvokeServer(unpack(args))
-				break
 			else
 				autoreplay()
-				break
 			end
 		else
-			print("Story Not Finished")
+
+			local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
+
 			if inLobby then
 				local args = {
 					[1] = "_lobbytemplategreen1"
 				}
-				
-				game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("request_join_lobby"):InvokeServer(unpack(args))			
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("endpoints")
+					:WaitForChild("client_to_server")
+					:WaitForChild("request_join_lobby")
+					:InvokeServer(unpack(args))
+
 				local args = {
 					[1] = "namek"
 				}
-				
-				game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("lobby_world_skip"):InvokeServer(unpack(args))
-				break			
+				game:GetService("ReplicatedStorage")
+					:WaitForChild("endpoints")
+					:WaitForChild("client_to_server")
+					:WaitForChild("lobby_world_skip")
+					:InvokeServer(unpack(args))
 			else
 				autoleave()
-				break
 			end
 		end
+
 		wait()
 	end
 end
@@ -550,21 +651,17 @@ function kaitun()
 	while kaitunEnabled == true do
 		local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
 		if inLobby then
-			print("inLobby")
 			checkPlayerXp()
 			wait(2)
 			autoEquipUnit()
 			wait(1)
 			checkProgressionPlayer()
-			break
 		else
-			print("inGame")
 			autoStart()
 			autoSkipWave()
 			autoPlaceUnit()
 			autoUpgradeUnit()
 			checkProgressionPlayer()
-			break
         end
 		wait()
 	end
@@ -720,6 +817,13 @@ function webhook()
                 color = 65280
             end
 
+			local pingContent = ""
+            if pingUserEnabled and pingUserIdWrited then
+                pingContent = "<@" .. pingUserIdWrited.. ">"
+            elseif pingUserEnabled then
+                pingContent = "@"
+            end
+
             local payload = {
                 content = pingContent,
                 embeds = {
@@ -785,35 +889,203 @@ function webhook()
     end
 end
 
-local autoreplay = true
-local autoStart = true
-local autoSkipWave = true
-local autoPlaceUnit = true
-local autoUpgradeUnit = true
-local checkProgressionPlayer = true
-local securityModeEnabled = false
-local deleteMapEnabled = false
-local blackScreenEnabled = true
-local hideInfoPlayerEnabled = true
-local kaitunEnabled = false
-local webhookEnabled = false
-local discordWebhookUrl = ""
-if kaitunEnabled == true then
-	kaitun()
+local Tabs = {
+	Main = Window:AddTab("Main"),
+}
+
+local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Player")
+
+LeftGroupBox:AddToggle("HPI", {
+	Text = "Hide Player Info",
+	Default = false,
+	Callback = function(Value)
+		hideInfoPlayerEnabled = Value
+		hideInfoPlayer()
+	end,
+})
+
+LeftGroupBox:AddToggle("SM", {
+	Text = "Security Mode",
+	Default = false,
+	Callback = function(Value)
+		securityModeEnabled = Value
+		securityMode()
+	end,
+})
+
+LeftGroupBox:AddToggle("DM", {
+	Text = "Delete Map",
+	Default = false,
+	Callback = function(Value)
+		deleteMapEnabled = Value
+		deleteMap()
+	end,
+})
+
+LeftGroupBox:AddToggle("KAITUN", {
+	Text = "Kaitun",
+	Default = false,
+	Callback = function(Value)
+		kaitunEnabled = Value
+		kaitun()
+	end,
+})
+
+local LeftGroupBox = Tabs.Main:AddLeftGroupbox("Webhook")
+
+LeftGroupBox:AddInput('WebhookURL', {
+    Default = '',
+    Text = "Webhook URL",
+    Numeric = false,
+    Finished = false,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        urlwebhook = Value
+    end
+})
+
+LeftGroupBox:AddInput('pingUser@', {
+    Default = '',
+    Text = "User ID",
+    Numeric = false,
+    Finished = false,
+    Placeholder = 'Press enter after paste',
+    Callback = function(Value)
+        pingUserIdWrited= Value
+    end
+})
+
+LeftGroupBox:AddToggle("WebhookFG", {
+    Text = "Send Webhook when finish game",
+    Default = false,
+    Callback = function(Value)
+        webhookEnabled = Value
+        webhook()
+    end,
+})
+
+LeftGroupBox:AddToggle("pingUser", {
+    Text = "Ping user",
+    Default = false,
+    Callback = function(Value)
+        pingUserEnabled = Value
+    end,
+})
+
+
+
+--UI IMPORTANT THINGS
+Library:SetWatermarkVisibility(true)
+
+local FrameTimer = tick()
+local FrameCounter = 0
+local FPS = 60
+local StartTime = tick()
+
+local WatermarkConnection
+
+local function FormatTime(seconds)
+	local hours = math.floor(seconds / 3600)
+	local minutes = math.floor((seconds % 3600) / 60)
+	local seconds = math.floor(seconds % 60)
+	return string.format("%02d:%02d:%02d", hours, minutes, seconds)
 end
-if hideInfoPlayerEnabled == true then
-	hideInfoPlayer()
+
+local function UpdateWatermark()
+	FrameCounter = FrameCounter + 1
+
+	if (tick() - FrameTimer) >= 1 then
+		FPS = FrameCounter
+		FrameTimer = tick()
+		FrameCounter = 0
+	end
+
+	local activeTime = tick() - StartTime
+
+	Library:SetWatermark(
+		("Tempest Hub | %s fps | %s ms | %s"):format(
+			math.floor(FPS),
+			math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()),
+			FormatTime(activeTime)
+		)
+	)
 end
-if securityModeEnabled == true then
-	securityMode()
+
+WatermarkConnection = game:GetService("RunService").RenderStepped:Connect(UpdateWatermark)
+
+local TabsUI = {
+	["UI Settings"] = Window:AddTab("UI Settings"),
+}
+
+local function Unload()
+	WatermarkConnection:Disconnect()
+	print("Unloaded!")
+	Library.Unloaded = true
 end
-if deleteMapEnabled == true then
-	deleteMap()
+
+local MenuGroup = TabsUI["UI Settings"]:AddLeftGroupbox("Menu")
+
+MenuGroup:AddToggle("huwe", {
+	Text = "Hide UI When Execute",
+	Default = false,
+	Callback = function(Value)
+		hideUIExecEnabled = Value
+		hideUIExec()
+	end,
+})
+
+MenuGroup:AddToggle("AUTOEXECUTE", {
+	Text = "Auto Execute",
+	Default = false,
+	Callback = function(Value)
+		aeuatEnabled = Value
+		aeuat()
+	end,
+})
+
+MenuGroup:AddToggle("AUTOEXECUTE", {
+	Text = "Blackscreen",
+	Default = false,
+	Callback = function(Value)
+		blackScreenEnabled = Value
+		blackScreen()
+	end,
+})
+
+MenuGroup:AddButton("Unload", function()
+	Library:Unload()
+end)
+MenuGroup:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", { Default = "End", NoUI = true, Text = "Menu keybind" })
+
+Library.ToggleKeybind = Options.MenuKeybind
+
+ThemeManager:SetLibrary(Library)
+SaveManager:SetLibrary(Library)
+
+--Save Settings
+ThemeManager:SetFolder("Tempest Hub")
+SaveManager:SetFolder("Tempest Hub/_AA_Kaitun_")
+
+SaveManager:BuildConfigSection(TabsUI["UI Settings"])
+
+ThemeManager:ApplyToTab(TabsUI["UI Settings"])
+
+SaveManager:LoadAutoloadConfig()
+
+local GameConfigName = "_AA_Kaitun_"
+local player = game.Players.LocalPlayer
+SaveManager:Load(player.Name .. GameConfigName)
+spawn(function()
+	while task.wait(1) do
+		if Library.Unloaded then
+			break
+		end
+		SaveManager:Save(player.Name .. GameConfigName)
+	end
+end)
+
+--Anti AFK
+for i, v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
+	v:Disable()
 end
-if blackScreenEnabled == true then
-	blackScreen()
-end
-if webhookEnabled == true then
-	webhook()
-end
-print("Executado")
+warn("[TEMPEST HUB] Loaded")
