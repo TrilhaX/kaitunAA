@@ -43,7 +43,7 @@ local TweenService = game:GetService("TweenService")
 local speed = 1000
 
 function hideUIExec()
-	if hideUIExecEnabled then
+	if getgenv().hideUIExec then
 		local coreGui = game:GetService("CoreGui")
 		local windowFrame = nil
 		
@@ -62,7 +62,7 @@ function hideUIExec()
 end
 
 function aeuat()
-	if aeuatEnabled == true then
+	if getgenv().aeuat == true then
 		local teleportQueued = false
 		game.Players.LocalPlayer.OnTeleport:Connect(function(State)
 			if
@@ -87,38 +87,34 @@ function aeuat()
 end
 
 function securityMode()
-	if securityModeEnabled == true then
-		local players = game:GetService("Players")
-		local ignorePlaceIds = { 8304191830 }
+	local players = game:GetService("Players")
+	local ignorePlaceIds = { 8304191830 }
 
-		local function isPlaceIdIgnored(placeId)
-			for _, id in ipairs(ignorePlaceIds) do
-				if id == placeId then
-					return true
-				end
+	local function isPlaceIdIgnored(placeId)
+		for _, id in ipairs(ignorePlaceIds) do
+			if id == placeId then
+				return true
 			end
-			return false
 		end
+		return false
+	end
 
-		while securityModeEnabled == true do
-			if #players:GetPlayers() >= 2 then
-				local player1 = players:GetPlayers()[1]
-				local targetPlaceId = 8304191830
+	while getgenv().securityMode do
+		if #players:GetPlayers() >= 2 then
+			local player1 = players:GetPlayers()[1]
+			local targetPlaceId = 8304191830
 
-				if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
-					game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
-				end
+			if game.PlaceId ~= targetPlaceId and not isPlaceIdIgnored(game.PlaceId) then
+				game:GetService("TeleportService"):Teleport(targetPlaceId, player1)
 			end
-			wait(1)
 		end
+		wait(1)
 	end
 end
 
-function deleteMap()
-	if deleteMapEnabled == true then
-		repeat
-			task.wait()
-		until game:IsLoaded()
+function deletemap()
+	if getgenv().deletemap == true then
+		repeat task.wait() until game:IsLoaded()
 		wait(5)
 		local map = workspace:FindFirstChild("_map")
 		local waterBlocks = workspace:FindFirstChild("_water_blocks")
@@ -136,7 +132,7 @@ function deleteMap()
 end
 
 function hideInfoPlayer()
-	if hideInfoPlayerEnabled == true then
+	if getgenv().hideInfoPlayer == true then
 		local player = game.Players.LocalPlayer
 		if not player then
 			return
@@ -477,7 +473,7 @@ function checkProgressionPlayer()
 
 		local storyFinished = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.level_data.completed_story_levelsA
 
-		if storyFinished == namek_level_6 then
+		if storyFinished == namek_level_6 and storyFinished == namek_level_5 then
 
 			local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
 
@@ -513,8 +509,10 @@ function checkProgressionPlayer()
 					:WaitForChild("client_to_server")
 					:WaitForChild("request_start_game")
 					:InvokeServer(unpack(args))
+				break
 			else
 				autoreplay()
+				break
 			end
 		else
 
@@ -538,8 +536,10 @@ function checkProgressionPlayer()
 					:WaitForChild("client_to_server")
 					:WaitForChild("lobby_world_skip")
 					:InvokeServer(unpack(args))
+				break
 			else
 				autoleave()
+				break
 			end
 		end
 
@@ -548,107 +548,112 @@ function checkProgressionPlayer()
 end
 
 function blackScreen()
-	if blackScreenEnabled == true then
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "BlackScreenTempestHub"
-		screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-		
-		local frame = Instance.new("Frame")
-		frame.Name = "BackgroundFrame"
-		frame.Size = UDim2.new(1, 0, 2, 0)
-		frame.Position = UDim2.new(0, 0, 0, -60)
-		frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-		frame.Parent = screenGui
-		
-		local centerFrame = Instance.new("Frame")
-		centerFrame.Name = "CenterFrame"
-		centerFrame.Size = UDim2.new(0, 300, 0, 300)
-		centerFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
-		centerFrame.AnchorPoint = Vector2.new(0, 0.7)
-		centerFrame.BackgroundTransparency = 1
-		centerFrame.Parent = frame
-		
-		local yOffset = 0
-		local player = game.Players.LocalPlayer
-		
-		local name = player.Name
-		local nameLabel = Instance.new("TextLabel")
-		nameLabel.Name = "NameLabel"
-		nameLabel.Size = UDim2.new(0, 200, 0, 50)
-		nameLabel.Position = UDim2.new(0.5, -100, 0, yOffset)
-		nameLabel.Text = "Name: " .. name
-		nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-		nameLabel.TextSize = 20
-		nameLabel.BackgroundTransparency = 1
-		nameLabel.Parent = centerFrame
-		yOffset = yOffset + 55
-		
-		local levelText = player.PlayerGui.spawn_units.Lives.Main.Desc.Level.Text
-		local numberAndAfter = levelText:sub(7)
-		local levelLabel = Instance.new("TextLabel")
-		levelLabel.Name = "LevelLabel"
-		levelLabel.Size = UDim2.new(0, 200, 0, 50)
-		levelLabel.Position = UDim2.new(0.5, -100, 0, yOffset)
-		levelLabel.Text = "Level: " .. numberAndAfter
-		levelLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-		levelLabel.TextSize = 20
-		levelLabel.BackgroundTransparency = 1
-		levelLabel.Parent = centerFrame
-		yOffset = yOffset + 55
-		
-		local gemsAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("gem_amount")
-		local Gems = Instance.new("TextLabel")
-		Gems.Name = "gemsLabel"
-		Gems.Size = UDim2.new(0, 200, 0, 50)
-		Gems.Position = UDim2.new(0.5, -100, 0, yOffset)
-		Gems.Text = "Gems: " .. gemsAmount.Value
-		Gems.TextColor3 = Color3.fromRGB(255, 255, 255)
-		Gems.TextSize = 20
-		Gems.BackgroundTransparency = 1
-		Gems.Parent = centerFrame
-		yOffset = yOffset + 55
-		
-		local goldAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("gold_amount")
-		local Gold = Instance.new("TextLabel")
-		Gold.Name = "goldLabel"
-		Gold.Size = UDim2.new(0, 200, 0, 50)
-		Gold.Position = UDim2.new(0.5, -100, 0, yOffset)
-		Gold.Text = "Gold: " .. goldAmount.Value
-		Gold.TextColor3 = Color3.fromRGB(255, 255, 255)
-		Gold.TextSize = 20
-		Gold.BackgroundTransparency = 1
-		Gold.Parent = centerFrame
-		yOffset = yOffset + 55
-		
-		local holidayAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceHolidayStars")
-		local Holiday = Instance.new("TextLabel")
-		Holiday.Name = "holidayLabel"
-		Holiday.Size = UDim2.new(0, 200, 0, 50)
-		Holiday.Position = UDim2.new(0.5, -100, 0, yOffset)
-		Holiday.Text = "Holiday Stars: " .. holidayAmount.Value
-		Holiday.TextColor3 = Color3.fromRGB(255, 255, 255)
-		Holiday.TextSize = 20
-		Holiday.BackgroundTransparency = 1
-		Holiday.Parent = centerFrame
-		yOffset = yOffset + 55
-		
-		local candyAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceCandies")
-		local candy = Instance.new("TextLabel")
-		candy.Name = "candyLabel"
-		candy.Size = UDim2.new(0, 200, 0, 50)
-		candy.Position = UDim2.new(0.5, -100, 0, yOffset)
-		candy.Text = "Candy: " .. candyAmount.Value
-		candy.TextColor3 = Color3.fromRGB(255, 255, 255)
-		candy.TextSize = 20
-		candy.BackgroundTransparency = 1
-		candy.Parent = centerFrame
-		yOffset = yOffset + 55
-		wait()
-	end
+	local screenGui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("BlackScreenTempestHub")
+	if screenGui then
+        screenGui.Enabled = not screenGui.Enabled
+    end
+end
+
+function createBC()
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.Name = "BlackScreenTempestHub"
+	screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+	screenGui.Enabled = false
+	
+	local frame = Instance.new("Frame")
+	frame.Name = "BackgroundFrame"
+	frame.Size = UDim2.new(1, 0, 2, 0)
+	frame.Position = UDim2.new(0, 0, 0, -60)
+	frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	frame.Parent = screenGui
+	
+	local centerFrame = Instance.new("Frame")
+	centerFrame.Name = "CenterFrame"
+	centerFrame.Size = UDim2.new(0, 300, 0, 300)
+	centerFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
+	centerFrame.AnchorPoint = Vector2.new(0, 0.7)
+	centerFrame.BackgroundTransparency = 1
+	centerFrame.Parent = frame
+	
+	local yOffset = 0
+	local player = game.Players.LocalPlayer
+	
+	local name = player.Name
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Name = "NameLabel"
+	nameLabel.Size = UDim2.new(0, 200, 0, 50)
+	nameLabel.Position = UDim2.new(0.5, -100, 0, yOffset)
+	nameLabel.Text = "Name: " .. name
+	nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	nameLabel.TextSize = 20
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local levelText = player.PlayerGui.spawn_units.Lives.Main.Desc.Level.Text
+	local numberAndAfter = levelText:sub(7)
+	local levelLabel = Instance.new("TextLabel")
+	levelLabel.Name = "LevelLabel"
+	levelLabel.Size = UDim2.new(0, 200, 0, 50)
+	levelLabel.Position = UDim2.new(0.5, -100, 0, yOffset)
+	levelLabel.Text = "Level: " .. numberAndAfter
+	levelLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+	levelLabel.TextSize = 20
+	levelLabel.BackgroundTransparency = 1
+	levelLabel.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local gemsAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("gem_amount")
+	local Gems = Instance.new("TextLabel")
+	Gems.Name = "gemsLabel"
+	Gems.Size = UDim2.new(0, 200, 0, 50)
+	Gems.Position = UDim2.new(0.5, -100, 0, yOffset)
+	Gems.Text = "Gems: " .. gemsAmount.Value
+	Gems.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Gems.TextSize = 20
+	Gems.BackgroundTransparency = 1
+	Gems.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local goldAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("gold_amount")
+	local Gold = Instance.new("TextLabel")
+	Gold.Name = "goldLabel"
+	Gold.Size = UDim2.new(0, 200, 0, 50)
+	Gold.Position = UDim2.new(0.5, -100, 0, yOffset)
+	Gold.Text = "Gold: " .. goldAmount.Value
+	Gold.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Gold.TextSize = 20
+	Gold.BackgroundTransparency = 1
+	Gold.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local holidayAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceHolidayStars")
+	local Holiday = Instance.new("TextLabel")
+	Holiday.Name = "holidayLabel"
+	Holiday.Size = UDim2.new(0, 200, 0, 50)
+	Holiday.Position = UDim2.new(0.5, -100, 0, yOffset)
+	Holiday.Text = "Holiday Stars: " .. holidayAmount.Value
+	Holiday.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Holiday.TextSize = 20
+	Holiday.BackgroundTransparency = 1
+	Holiday.Parent = centerFrame
+	yOffset = yOffset + 55
+	
+	local candyAmount = game:GetService("Players").LocalPlayer._stats:FindFirstChild("_resourceCandies")
+	local candy = Instance.new("TextLabel")
+	candy.Name = "candyLabel"
+	candy.Size = UDim2.new(0, 200, 0, 50)
+	candy.Position = UDim2.new(0.5, -100, 0, yOffset)
+	candy.Text = "Candy: " .. candyAmount.Value
+	candy.TextColor3 = Color3.fromRGB(255, 255, 255)
+	candy.TextSize = 20
+	candy.BackgroundTransparency = 1
+	candy.Parent = centerFrame
+	yOffset = yOffset + 55
 end
 
 function kaitun()
-	while kaitunEnabled == true do
+	while getgenv().kaitun == true do
 		local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
 		if inLobby then
 			checkPlayerXp()
@@ -668,7 +673,7 @@ function kaitun()
 end
 
 function webhook()
-    while webhookEnabled == true do
+    while getgenv().webhook == true do
         local discordWebhookUrl = urlwebhook
         local resultUI = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("ResultsUI")
 
@@ -818,9 +823,9 @@ function webhook()
             end
 
 			local pingContent = ""
-            if pingUserEnabled and pingUserIdWrited then
-                pingContent = "<@" .. pingUserIdWrited.. ">"
-            elseif pingUserEnabled then
+            if getgenv().pingUser and getgenv().pingUserId then
+                pingContent = "<@" .. getgenv().pingUserId .. ">"
+            elseif getgenv().pingUser then
                 pingContent = "@"
             end
 
@@ -899,7 +904,7 @@ LeftGroupBox:AddToggle("HPI", {
 	Text = "Hide Player Info",
 	Default = false,
 	Callback = function(Value)
-		hideInfoPlayerEnabled = Value
+		getgenv().hideInfoPlayer = Value
 		hideInfoPlayer()
 	end,
 })
@@ -908,7 +913,7 @@ LeftGroupBox:AddToggle("SM", {
 	Text = "Security Mode",
 	Default = false,
 	Callback = function(Value)
-		securityModeEnabled = Value
+		getgenv().securityMode = Value
 		securityMode()
 	end,
 })
@@ -917,8 +922,8 @@ LeftGroupBox:AddToggle("DM", {
 	Text = "Delete Map",
 	Default = false,
 	Callback = function(Value)
-		deleteMapEnabled = Value
-		deleteMap()
+		getgenv().deletemap = Value
+		deletemap()
 	end,
 })
 
@@ -926,7 +931,7 @@ LeftGroupBox:AddToggle("KAITUN", {
 	Text = "Kaitun",
 	Default = false,
 	Callback = function(Value)
-		kaitunEnabled = Value
+		getgenv().kaitun = Value
 		kaitun()
 	end,
 })
@@ -951,7 +956,7 @@ LeftGroupBox:AddInput('pingUser@', {
     Finished = false,
     Placeholder = 'Press enter after paste',
     Callback = function(Value)
-        pingUserIdWrited= Value
+        getgenv().pingUserId = Value
     end
 })
 
@@ -959,7 +964,7 @@ LeftGroupBox:AddToggle("WebhookFG", {
     Text = "Send Webhook when finish game",
     Default = false,
     Callback = function(Value)
-        webhookEnabled = Value
+        getgenv().webhook = Value
         webhook()
     end,
 })
@@ -968,11 +973,9 @@ LeftGroupBox:AddToggle("pingUser", {
     Text = "Ping user",
     Default = false,
     Callback = function(Value)
-        pingUserEnabled = Value
+        getgenv().pingUser = Value
     end,
 })
-
-
 
 --UI IMPORTANT THINGS
 Library:SetWatermarkVisibility(true)
@@ -1029,7 +1032,7 @@ MenuGroup:AddToggle("huwe", {
 	Text = "Hide UI When Execute",
 	Default = false,
 	Callback = function(Value)
-		hideUIExecEnabled = Value
+		getgenv().hideUIExec = Value
 		hideUIExec()
 	end,
 })
@@ -1038,7 +1041,7 @@ MenuGroup:AddToggle("AUTOEXECUTE", {
 	Text = "Auto Execute",
 	Default = false,
 	Callback = function(Value)
-		aeuatEnabled = Value
+		getgenv().aeuat = Value
 		aeuat()
 	end,
 })
@@ -1047,7 +1050,7 @@ MenuGroup:AddToggle("AUTOEXECUTE", {
 	Text = "Blackscreen",
 	Default = false,
 	Callback = function(Value)
-		blackScreenEnabled = Value
+		getgenv().blackScreen = Value
 		blackScreen()
 	end,
 })
@@ -1089,3 +1092,4 @@ for i, v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
 	v:Disable()
 end
 warn("[TEMPEST HUB] Loaded")
+createBC()
