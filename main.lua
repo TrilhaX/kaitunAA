@@ -457,11 +457,8 @@ end
 
 function checkProgressionPlayer()
 	while checkProgressionPlayerEnabled == true do
-
 		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-
 		upvalues = debug.getupvalues(Loader.init)
-
 		local Modules = {
 			["CORE_CLASS"] = upvalues[6],
 			["CORE_SERVICE"] = upvalues[7],
@@ -470,13 +467,16 @@ function checkProgressionPlayer()
 			["CLIENT_CLASS"] = upvalues[10],
 			["CLIENT_SERVICE"] = upvalues[11],
 		}
-
-		local storyFinished = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.level_data.completed_story_levelsA
-
-		if storyFinished == namek_level_6 and storyFinished == namek_level_5 then
-
+		function getKeys(tbl)
+			for key, _ in pairs(tbl) do
+				return key
+			end
+			return nil
+		end
+		local storyFinished = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.level_data.completed_story_levels
+		local storyFinishedToCheck = getKeys(storyFinished)
+		if storyFinishedToCheck == "namek_level_6" then
 			local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
-
 			if inLobby then
 				local args = {
 					[1] = "_lobbytemplategreen1"
@@ -515,7 +515,6 @@ function checkProgressionPlayer()
 				break
 			end
 		else
-
 			local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
 
 			if inLobby then
