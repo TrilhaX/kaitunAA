@@ -367,7 +367,7 @@ function autoUpgrade()
 					for _, unit in pairs(unitsFolder:GetChildren()) do
 						if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
 							local args = {
-								[1] = unitInMap
+								[1] = ownedUnit.unit_id
 							}
 
 							local success, err = pcall(function()
