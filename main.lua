@@ -356,17 +356,27 @@ function autoUpgrade()
                     local unitInMap = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(ownedUnit.unit_id))
 
                     if unitInMap then
-                        local args = {
-                            [1] = unitInMap
-                        }
+						local units = workspace:FindFirstChild("_UNITS")
 
-                        local success, err = pcall(function()
-                            game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
-                        end)
+						if units then
+							for i,v in pairs(units:GetChildren())do
+								if ownedUnit.unit_id == v.Name then
+									local args = {
+										[1] = unitInMap
+									}
 
-                        if not success then
-                            warn("Erro ao realizar upgrade da unidade:", err)
-                        end
+									local success, err = pcall(function()
+										game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
+									end)
+
+									if not success then
+										warn("Erro ao realizar upgrade da unidade:", err)
+									end
+								else
+									print("No unit matched")
+								end
+							end
+						end
                     else
                         print("Unidade não encontrada no mapa para o ID:", ownedUnit.unit_id)
                     end
