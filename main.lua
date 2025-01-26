@@ -320,75 +320,79 @@ end
 
 function autoUpgrade()
     while getgenv().autoUpgrade == true do
-        local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-        local upvalues = debug.getupvalues(Loader.init)
+		local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
+		local upvalues = debug.getupvalues(Loader.init)
+		
+		local Modules = {
+			["CORE_CLASS"] = upvalues[6],
+			["CORE_SERVICE"] = upvalues[7],
+			["SERVER_CLASS"] = upvalues[8],
+			["SERVER_SERVICE"] = upvalues[9],
+			["CLIENT_CLASS"] = upvalues[10],
+			["CLIENT_SERVICE"] = upvalues[11],
+		}
+		
+		local ownedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.owned_units
+		local equippedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.equipped_units
+		
+		function checkEquippedAgainstOwned()
+			local matchedUUIDs = {}
+		
+			for _, equippedUUID in pairs(equippedUnits) do
+				for key, _ in pairs(ownedUnits) do
+					if tostring(equippedUUID) == tostring(key) then
+						table.insert(matchedUUIDs, key)
+					end
+				end
+			end
+		
+			return matchedUUIDs
+		end
+		
+		function getBaseName(unitName)
+			return string.match(unitName, "^(.-)_evolved$") or unitName
+		end
+		
+		function printUnitNames(matchedUUIDs)
+			local unitsFolder = workspace:FindFirstChild("_UNITS")
+			if not unitsFolder then
+				warn("Pasta '_UNITS' não encontrada no workspace!")
+				return
+			end
+		
+			for _, matchedUUID in pairs(matchedUUIDs) do
+				local ownedUnit = ownedUnits[matchedUUID]
+				if ownedUnit and ownedUnit.unit_id then
+					local found = false
+					for _, unit in pairs(unitsFolder:GetChildren()) do
+						if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
+							local args = {
+								[1] = unitInMap
+							}
 
-        local Modules = {
-            ["CORE_CLASS"] = upvalues[6],
-            ["CORE_SERVICE"] = upvalues[7],
-            ["SERVER_CLASS"] = upvalues[8],
-            ["SERVER_SERVICE"] = upvalues[9],
-            ["CLIENT_CLASS"] = upvalues[10],
-            ["CLIENT_SERVICE"] = upvalues[11],
-        }
+							local success, err = pcall(function()
+								game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
+							end)
 
-        local ownedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.owned_units
-        local equippedUnits = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.collection.collection_profile_data.equipped_units
-
-        function checkEquippedAgainstOwned()
-            local matchedUUIDs = {}
-
-            for _, equippedUUID in pairs(equippedUnits) do
-                for key, ownedUUID in pairs(ownedUnits) do
-                    if tostring(equippedUUID) == tostring(key) then
-                        table.insert(matchedUUIDs, key)
-                    end
-                end
-            end
-
-            return matchedUUIDs
-        end
-
-        function printUnitNames(matchedUUIDs)
-            for _, matchedUUID in pairs(matchedUUIDs) do
-                local ownedUnit = ownedUnits[matchedUUID]
-                if ownedUnit and ownedUnit.unit_id then
-                    local unitInMap = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(ownedUnit.unit_id))
-
-                    if unitInMap then
-						local units = workspace:FindFirstChild("_UNITS")
-
-						if units then
-							for i,v in pairs(units:GetChildren())do
-								if ownedUnit.unit_id == v.Name then
-									local args = {
-										[1] = unitInMap
-									}
-
-									local success, err = pcall(function()
-										game:GetService("ReplicatedStorage"):WaitForChild("endpoints"):WaitForChild("client_to_server"):WaitForChild("upgrade_unit_ingame"):InvokeServer(unpack(args))
-									end)
-
-									if not success then
-										warn("Erro ao realizar upgrade da unidade:", err)
-									end
-								else
-									print("No unit matched")
-								end
+							if not success then
+								warn("Erro ao realizar upgrade da unidade:", err)
 							end
+							found = true
 						end
-                    else
-                        print("Unidade não encontrada no mapa para o ID:", ownedUnit.unit_id)
-                    end
-                end
-            end
-        end
-
-        local matchingUUIDs = checkEquippedAgainstOwned()
-        if #matchingUUIDs > 0 then
-            printUnitNames(matchingUUIDs)
-        else
-        end
+					end
+					if not found then
+						print("Unidade possuída não encontrada no mapa:", ownedUnit.unit_id)
+					end
+				end
+			end
+		end
+		
+		local matchingUUIDs = checkEquippedAgainstOwned()
+		if #matchingUUIDs > 0 then
+			printUnitNames(matchingUUIDs)
+		else
+			print("Nenhuma unidade equipada corresponde às unidades possuídas.")
+		end		
         wait()
     end
 end
