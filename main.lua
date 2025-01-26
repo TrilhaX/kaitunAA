@@ -410,6 +410,19 @@ function autoEquipUnit()
 	local selectedUUIDs = {}
 	local count = 0
 
+	function getMaxUnitsByLevel()
+		local playerLevel = checkPlayerXp()
+		if playerLevel >= 0 and playerLevel <= 14 then
+			return 4
+		elseif playerLevel >= 15 and playerLevel <= 29 then
+			return 5
+		else
+			return 6
+		end
+	end
+
+	local maxUnits = getMaxUnitsByLevel()
+
 	if type(ownedUnits) == "table" then
 		local uuidList = {}
 
@@ -419,7 +432,7 @@ function autoEquipUnit()
 			end
 		end
 
-		while count < 6 and #uuidList > 0 do
+		while count < maxUnits and #uuidList > 0 do
 			local randomIndex = math.random(1, #uuidList)
 			local uuid = uuidList[randomIndex]
 
@@ -438,6 +451,9 @@ function autoEquipUnit()
 				wait(1)
 			end
 
+			local playerLevel = checkPlayerXp()
+			maxUnits = getMaxUnitsByLevel()
+
 			table.remove(uuidList, randomIndex)
 		end
 	else
@@ -447,7 +463,7 @@ end
 
 function checkPlayerXp()
 	local Loader = require(game:GetService("ReplicatedStorage").src.Loader)
-	upvalues = debug.getupvalues(Loader.init)
+	local upvalues = debug.getupvalues(Loader.init)
 	local Modules = {
 		["CORE_CLASS"] = upvalues[6],
 		["CORE_SERVICE"] = upvalues[7],
@@ -456,6 +472,7 @@ function checkPlayerXp()
 		["CLIENT_CLASS"] = upvalues[10],
 		["CLIENT_SERVICE"] = upvalues[11],
 	}
+
 	local playerXp = Modules["CLIENT_SERVICE"]["StatsServiceClient"].module.session.profile_data.player_xp
 	if playerXp == 0 then
 		local args = {
@@ -468,8 +485,13 @@ function checkPlayerXp()
 			:WaitForChild("client_to_server")
 			:WaitForChild("buy_from_banner")
 			:InvokeServer(unpack(args))
+		return 0
+	elseif playerXp == 15 or playerXp == 30 then
+		print("Have Played")
+		return playerXp
 	else
 		print("Have Played")
+		return playerXp or "Unknown XP"
 	end
 end
 
@@ -681,13 +703,21 @@ function kaitun()
 	while getgenv().kaitun == true do
 		local inLobby = workspace:FindFirstChild("_LOBBY_CONFIG")
 		if inLobby then
-			checkPlayerXp()
+			task.spawn(function()
+				checkPlayerXp()
+			end)
 			wait(2)
-			autoEquipUnit()
+			task.spawn(function()
+				autoEquipUnit()
+			end)
 			wait(1)
-			checkProgressionPlayer()
+			task.spawn(function()
+				checkProgressionPlayer()
+			end)
 		else
-			checkProgressionPlayer()
+			task.spawn(function()
+				checkProgressionPlayer()
+			end)
         end
 		wait()
 	end
