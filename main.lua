@@ -367,7 +367,7 @@ function autoUpgrade()
 					for _, unit in pairs(unitsFolder:GetChildren()) do
 						if getBaseName(ownedUnit.unit_id) == getBaseName(unit.Name) then
 							local args = {
-								[1] = ownedUnit.unit_id
+								[1] = workspace:WaitForChild("_UNITS"):WaitForChild(tostring(ownedUnit.unit_id))
 							}
 
 							local success, err = pcall(function()
